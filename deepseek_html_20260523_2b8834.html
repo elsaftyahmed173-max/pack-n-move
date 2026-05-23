@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>باك اند موف | Pack & Move - النظام المتكامل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+            direction: rtl;
+        }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+        
+        .header {
+            background: linear-gradient(135deg, #0a1a2f 0%, #1e3a5f 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo { font-size: 1.8rem; font-weight: 800; }
+        .logo span { color: #B10622; }
+        .logo small { font-size: 0.7rem; display: block; color: #cbd5e1; }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .tab-btn {
+            background: #e2e8f0;
+            color: #1e293b;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn.active { background: #0a1a2f; color: white; }
+        .tab-btn:hover:not(.active) { background: #cbd5e1; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .stat-card i { font-size: 1.8rem; color: #B10622; margin-bottom: 8px; }
+        .stat-card h3 { font-size: 1.4rem; font-weight: 800; }
+        .stat-card p { font-size: 0.75rem; color: #64748b; }
+        
+        .date-selector {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .date-nav { display: flex; gap: 10px; align-items: center; }
+        .date-nav button {
+            background: #0a1a2f; color: white; border: none; padding: 10px 20px;
+            border-radius: 40px; cursor: pointer; font-size: 1rem;
+        }
+        .date-nav button:hover { background: #B10622; }
+        .current-date-box {
+            background: #f1f5f9; padding: 10px 25px; border-radius: 40px; font-weight: bold; font-size: 1.1rem;
+        }
+        .date-nav input { padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 40px; font-family: inherit; }
+        
+        .trucks-dashboard {
+            background: white;
+            border-radius: 28px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .trucks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .truck-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .truck-card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.1); }
+        .truck-card.available { background: linear-gradient(145deg, #dcfce7, #bbf7d0); border-color: #16a34a; }
+        .truck-card.booked { background: linear-gradient(145deg, #fee2e2, #fecaca); border-color: #dc2626; }
+        .truck-card.off { background: linear-gradient(145deg, #e2e8f0, #cbd5e1); border-color: #64748b; opacity: 0.7; cursor: not-allowed; }
+        .truck-number { font-size: 1.3rem; font-weight: 800; }
+        .truck-status { font-size: 0.75rem; margin-top: 8px; }
+        .truck-time-info { font-size: 0.7rem; margin-top: 5px; color: #475569; }
+        
+        .times-slots {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .time-slot {
+            background: #f8fafc;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 2px solid transparent;
+        }
+        .time-slot.available { background: #dcfce7; color: #166534; border-color: #16a34a; }
+        .time-slot.booked { background: #fee2e2; color: #991b1b; border-color: #dc2626; cursor: not-allowed; opacity: 0.7; }
+        .time-slot:hover:not(.booked) { transform: scale(1.02); background: #bbf7d0; }
+        
+        .client-page {
+            background: white;
+            border-radius: 32px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .client-info {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-right: 5px solid #B10622;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .status-confirmed { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fed7aa; color: #9a3412; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+        .status-rescheduled { background: #c7d2fe; color: #3730a3; }
+        
+        .calendar {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+        .calendar-day {
+            padding: 12px;
+            border-radius: 16px;
+            background: #f1f5f9;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .calendar-day.booked { background: #dc2626; color: white; }
+        .calendar-day.available { background: #16a34a; color: white; }
+        .calendar-day.partial { background: #eab308; color: white; }
+        .calendar-day:hover { transform: scale(0.95); }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        input, select, textarea {
+            width: 100%; padding: 12px; border: 1px solid #cbd5e1;
+            border-radius: 16px; font-family: inherit; font-size: 0.95rem;
+        }
+        button {
+            background: #0a1a2f; color: white; border: none;
+            padding: 10px 20px; border-radius: 40px; font-weight: bold; cursor: pointer;
+        }
+        button:hover { background: #B10622; }
+        .btn-excel { background: #1e6f3f; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; font-size: 0.8rem; }
+        th { background: #0a1a2f; color: white; }
+        
+        .search-box { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; border-radius: 28px; padding: 25px;
+            max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto;
+        }
+        .history-note { font-size: 0.65rem; color: #64748b; margin-top: 3px; max-width: 150px; }
+        
+        .email-settings {
+            background: #f8fafc; padding: 15px 20px; border-radius: 60px;
+            margin-bottom: 20px; border-right: 4px solid #B10622;
+        }
+        .email-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .email-tag {
+            background: #e2e8f0;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .email-tag i { cursor: pointer; color: #dc2626; }
+        
+        .report-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 700px) {
+            .trucks-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+            .calendar-day { padding: 6px; font-size: 0.65rem; }
+            .date-nav button { padding: 6px 12px; font-size: 0.8rem; }
+            .times-slots { gap: 6px; }
+            .time-slot { padding: 6px 12px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="container">
+        <div class="logo">باك اند موف <span>Pack & Move</span><small>نظام متكامل - نقل . معاينة . توصيل</small></div>
+        <div><i class="fas fa-headset"></i> خدمة العملاء | <i class="fab fa-instagram"></i> packandmove</div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- إعدادات البريد الجماعي -->
+    <div class="email-settings">
+        <div><i class="fas fa-envelope"></i> <strong>إشعارات البريد الجماعي</strong><br><small>سيتم إرسال إشعار لكل عملية إلى جميع الإيميلات المسجلة</small></div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+            <input type="email" id="newEmailInput" placeholder="بريد موظف (مثال: employee@company.com)" style="width: 250px;">
+            <button id="addEmailBtn"><i class="fas fa-plus"></i> إضافة بريد</button>
+        </div>
+        <div class="email-list" id="emailList"></div>
+        <div><small id="emailCount" style="color:#64748b;"></small></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="moving">🚛 النقل (Moving)</button>
+        <button class="tab-btn" data-tab="survey">📋 المعاينة (Survey)</button>
+        <button class="tab-btn" data-tab="delivery">📦 التوصيل (Delivery)</button>
+        <button class="tab-btn" data-tab="report">📊 Daily Report & متابعة الفرق</button>
+    </div>
+
+    <!-- ============= قسم النقل (Moving) ============= -->
+    <div id="movingTab" class="tab-content">
+        <div class="stats-grid" id="movingStats"></div>
+
+        <div class="date-selector">
+            <div class="date-nav">
+                <button id="movingPrevDay"><i class="fas fa-chevron-right"></i> اليوم السابق</button>
+                <button id="movingNextDay">اليوم التالي <i class="fas fa-chevron-left"></i></button>
+            </div>
+            <div class="current-date-box" id="movingCurrentDate"></div>
+            <div class="date-nav">
+                <input type="date" id="movingDatePicker">
+                <button id="movingGoToDate"><i class="fas fa-calendar-day"></i> عرض</button>
+                <button id="movingToday"><i class="fas fa-sun"></i> اليوم</button>
+            </div>
+        </div>
+
+        <div class="trucks-dashboard">
+            <div class="section-header">
+                <h3><i class="fas fa-truck"></i> حالة السيارات - <span id="movingSelectedDate"></span></h3>
+                <span style="font-size: 0.8rem; color: #64748b;">🟢 متاحة | 🔴 محجوزة | ⚪ إجازة | اضغط على السيارة لحجزها</span>
+            </div>
+            <div class="trucks-grid" id="trucksGrid"></div>
+        </div>
+
+        <div class="client-page">
+            <div class="search-box">
+                <input type="text" id="searchMoving" placeholder="بحث باسم العميل أو رقم الجوال...">
+                <button id="searchMovingBtn"><i class="fas fa-search"></i> بحث</button>
+                <button id="showAllMovingBtn"><i class="fas fa-list"></i> عرض جميع العملاء</button>
+                <button id="newMovingBtn" style="background:#B10622;"><i class="fas fa-plus"></i> حجز جديد</button>
+            </div>
+            
+            <div id="movingHistorySection">
+                <h3><i class="fas fa-history"></i> هيستوري العميل (شامل الملغى والمؤجل)</h3>
+                <div id="movingSelectedInfo" class="client-info" style="display: none;"></div>
+                <div style="overflow-x: auto;">
+                    <table id="movingHistoryTable">
+                        <thead><table><th>#</th><th>التاريخ</th><th>الموعد</th><th>السيارة</th><th>من</th><th>إلى</th><th>الدروب</th><th>السعر/درب</th><th>الإجمالي</th><th>الحالة</th><th>الملاحظات</th><th>سجل التعديلات</th><th>إجراءات</th></tr></thead>
+                        <tbody id="movingHistoryBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="movingAllClients" style="display: none;">
+                <h3><i class="fas fa-users"></i> جميع العملاء</h3>
+                <div style="overflow-x: auto;">
+                    <table id="movingAllTable">
+                        <thead><tr><th>#</th><th>اسم العميل</th><th>الجوال</th><th>عدد الحجوزات</th><th>آخر حجز</th><th>الإجمالي</th><th>إجراءات</th></tr></thead>
+                        <tbody id="movingAllBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar">
+            <div class="calendar-header">
+                <button id="movingPrevMonth"><i class="fas fa-chevron-right"></i></button>
+                <h3 id="movingCurrentMonthYear"></h3>
+                <button id="movingNextMonth"><i class="fas fa-chevron-left"></i></button>
+            </div>
+            <div class="calendar-grid" id="movingCalendarGrid"></div>
+            <div style="margin-top: 15px; text-align: center;">
+                <span style="background:#dc2626; color:white; padding:2px 8px; border-radius:20px;">■ محجوز كامل</span>
+                <span style="background:#eab308; color:white; padding:2px 8px; border-radius:20px;">■ حجوزات محدودة</span>
+                <span style="background:#16a34a; color:white; padding:2px 8px; border-radius:20px;">■ متاح</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= قسم المعاينة (Survey) ============= -->
+    <div id="surveyTab" class="tab-content" style="display: none;">
+        <div class="stats-grid" id="surveyStats"></div>
+
+        <div class="date-selector">
+            <div class="date-nav">
+                <button id="surveyPrevDay"><i class="fas fa-chevron-right"></i> اليوم السابق</button>
+                <button id="surveyNextDay">اليوم التالي <i class="fas fa-chevron-left"></i></button>
+            </div>
+            <div class="current-date-box" id="surveyCurrentDate"></div>
+            <div class="date-nav">
+                <input type="date" id="surveyDatePicker">
+                <button id="surveyGoToDate"><i class="fas fa-calendar-day"></i> عرض</button>
+                <button id="surveyToday"><i class="fas fa-sun"></i> اليوم</button>
+            </div>
+        </div>
+
+        <div class="client-page">
+            <div class="section-header">
+                <h3><i class="fas fa-clock"></i> المواعيد المتاحة للمعاينة - <span id="surveySelectedDate"></span></h3>
+            </div>
+            <div class="times-slots" id="surveyTimeSlots"></div>
+        </div>
+
+        <div class="client-page">
+            <div class="search-box">
+                <input type="text" id="searchSurvey" placeholder="بحث باسم العميل...">
+                <button id="searchSurveyBtn"><i class="fas fa-search"></i> بحث</button>
+                <button id="showAllSurveyBtn"><i class="fas fa-list"></i> عرض الكل</button>
+                <button id="newSurveyBtn" style="background:#B10622;"><i class="fas fa-plus"></i> معاينة جديدة</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="surveyTable">
+                    <thead><tr><th>#</th><th>العميل</th><th>الجوال</th><th>العنوان</th><th>الموعد</th><th>الملاحظات</th><th>إجراءات</th></td></thead>
+                    <tbody id="surveyTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= قسم التوصيل (Delivery) ============= -->
+    <div id="deliveryTab" class="tab-content" style="display: none;">
+        <div class="stats-grid" id="deliveryStats"></div>
+
+        <div class="date-selector">
+            <div class="date-nav">
+                <button id="deliveryPrevDay"><i class="fas fa-chevron-right"></i> اليوم السابق</button>
+                <button id="deliveryNextDay">اليوم التالي <i class="fas fa-chevron-left"></i></button>
+            </div>
+            <div class="current-date-box" id="deliveryCurrentDate"></div>
+            <div class="date-nav">
+                <input type="date" id="deliveryDatePicker">
+                <button id="deliveryGoToDate"><i class="fas fa-calendar-day"></i> عرض</button>
+                <button id="deliveryToday"><i class="fas fa-sun"></i> اليوم</button>
+            </div>
+        </div>
+
+        <div class="client-page">
+            <div class="section-header">
+                <h3><i class="fas fa-clock"></i> المواعيد المتاحة للتوصيل - <span id="deliverySelectedDate"></span></h3>
+            </div>
+            <div class="times-slots" id="deliveryTimeSlots"></div>
+        </div>
+
+        <div class="client-page">
+            <div class="search-box">
+                <input type="text" id="searchDelivery" placeholder="بحث باسم العميل...">
+                <button id="searchDeliveryBtn"><i class="fas fa-search"></i> بحث</button>
+                <button id="showAllDeliveryBtn"><i class="fas fa-list"></i> عرض الكل</button>
+                <button id="newDeliveryBtn" style="background:#B10622;"><i class="fas fa-plus"></i> طلب توصيل جديد</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="deliveryTable">
+                    <thead><tr><th>#</th><th>العميل</th><th>الجوال</th><th>العنوان</th><th>الموعد</th><th>تفاصيل الطلب</th><th>إجراءات</th></tr></thead>
+                    <tbody id="deliveryTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= Daily Report & متابعة الفرق ============= -->
+    <div id="reportTab" class="tab-content" style="display: none;">
+        <div class="client-page">
+            <h3><i class="fas fa-file-excel"></i> Daily Report - ملفات منفصلة</h3>
+            <div class="form-grid">
+                <input type="date" id="reportDate" value="2026-05-23">
+            </div>
+            
+            <div class="report-buttons">
+                <button id="exportMovingReport" class="btn-excel"><i class="fas fa-truck"></i> تصدير تقرير النقل</button>
+                <button id="exportSurveyReport" class="btn-excel"><i class="fas fa-clipboard-list"></i> تصدير تقرير المعاينة</button>
+                <button id="exportDeliveryReport" class="btn-excel"><i class="fas fa-box"></i> تصدير تقرير التوصيل</button>
+                <button id="exportTeamsReport" class="btn-excel"><i class="fas fa-users"></i> تصدير متابعة الفرق</button>
+            </div>
+            
+            <h3 style="margin-top: 25px;"><i class="fas fa-chart-line"></i> متابعة الفرق - اليوم</h3>
+            <div style="overflow-x: auto;">
+                <table id="teamsReportTable">
+                    <thead><tr><th>الفريق</th><th>عدد الدروب</th><th>العميل</th><th>من</th><th>إلى</th><th>الموعد</th></tr></thead>
+                    <tbody id="teamsReportBody"></tbody>
+                </table>
+            </div>
+            
+            <h3 style="margin-top: 25px;"><i class="fas fa-calendar-alt"></i> ملخص اليوم</h3>
+            <div id="dailySummary" style="background:#f1f5f9; padding:15px; border-radius:20px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال الحجز للنقل -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle"><i class="fas fa-truck"></i> حجز جديد</h3>
+        <div class="form-grid" style="grid-template-columns: 1fr;">
+            <input type="text" id="modalClientName" placeholder="اسم العميل *">
+            <input type="tel" id="modalClientPhone" placeholder="رقم الجوال *">
+            <select id="modalFromArea"><option value="">-- من (المنطقة) * --</option></select>
+            <select id="modalToArea"><option value="">-- إلى (المنطقة) * --</option></select>
+            <input type="date" id="modalMoveDate" required>
+            <select id="modalTimeSlot">
+                <option value="صباحاً">صباحاً (9:30) - حتى 3 دروب</option>
+                <option value="مساءً">مساءً (4:30) - درب واحد</option>
+            </select>
+            <select id="modalNumDroops">
+                <option value="1">1 درب</option><option value="2">2 دروب</option><option value="3">3 دروب</option>
+                <option value="4">4 دروب</option><option value="5">5 دروب</option><option value="6">6 دروب</option>
+                <option value="7">7 دروب</option><option value="8">8 دروب</option><option value="9">9 دروب</option>
+            </select>
+            <select id="modalTruck"><option value="">-- اختر السيارة --</option></select>
+            <select id="modalStatus">
+                <option value="confirmed">✅ تم التأكيد</option>
+                <option value="pending">⏳ انتظار</option>
+                <option value="cancelled">❌ كنسل</option>
+                <option value="rescheduled">🔄 مؤجل</option>
+            </select>
+            <textarea id="modalNotes" placeholder="ملاحظات إضافية (محتوى الأغراض، العنوان بالتفصيل...)" rows="2"></textarea>
+            <div id="modalPriceDisplay" style="background:#f1f5f9; padding:10px; border-radius:16px; text-align:center;"></div>
+            <button id="confirmBookingBtn"><i class="fas fa-save"></i> حفظ الحجز</button>
+        </div>
+        <button onclick="closeModal()" style="margin-top:10px; background:#64748b;">إلغاء</button>
+    </div>
+</div>
+
+<script>
+    // ============= تصنيف المناطق حسب السعر =============
+    const AREAS_PRICE_B = [
+        "غرناطة", "الصليبخات", "النهضة", "مدينة جابر الأحمد", "القيروان", "الدوحة", "دسمان", "منطقة شرق", "الصوابر", 
+        "المرقاب", "القبلة", "الصالحية", "الوطية", "بنيد القار", "السالمية", "حولي", "الجابرية", "الرميثية", "بيان", 
+        "مشرف", "الشعب", "السلام", "حطين", "الزهراء", "ضاحية مبارك العبد الله الجابر", "الشهداء", "البدع", "الصديق", 
+        "الظهر", "الرقة", "هدية", "الفنطاس", "العقيلة", "ضاحية جابر العلي", "الفروانية", "خيطان", "الأندلس", "الشدادية", 
+        "الرابية", "أشبيليه", "الرحاب", "جليب الشويخ", "الرقعي", "العارضية", "العارضية الصناعية", "صباح الناصر", 
+        "عبد الله المبارك", "الفردوس", "الضجيج", "غرب عبد الله المبارك الجديدة", "صباح السالم", "المسيلة", "المسايل", 
+        "العدان", "القصور", "القرين", "أبو الحصانية", "أبو فطيرة", "صبحان", "الفنطيس", "سلوى"
+    ];
+    
+    const AREAS_PRICE_C = [
+        "المنقف", "أبو حليفة", "الصباحية", "الأحمدي", "الفحيحيل", "شرق الأحمدي", "علي صباح", "المهبولة", "الواحة", 
+        "القصر", "الجهراء القديمة", "العيون", "النسيم", "النعيم", "التيماء", "سعد العبد الله", "ضاحية فهد الأحمد"
+    ];
+    
+    const AREAS_PRICE_D = [
+        "ميناء عبد الله", "الشعبية", "بندر", "الزور", "الجليعة", "النويصيب", "الخيران", "الوفرة", 
+        "مدينة صباح الأحمد السكنية", "مدينة صباح الأحمد البحرية", "المقوع", "ميناء الأحمدي", "المطلاع", 
+        "العبدلي", "أمغرة", "الصبية", "السكراب"
+    ];
+    
+    const ALL_AREAS = [...AREAS_PRICE_B, ...AREAS_PRICE_C, ...AREAS_PRICE_D];
+    
+    function getAreaPrice(area) {
+        if(AREAS_PRICE_B.includes(area)) return 65;
+        if(AREAS_PRICE_C.includes(area)) return 70;
+        if(AREAS_PRICE_D.includes(area)) return 85;
+        return 65;
+    }
+    
+    function calculateTripPrice(fromArea, toArea) {
+        const fromPrice = getAreaPrice(fromArea);
+        const toPrice = getAreaPrice(toArea);
+        return Math.max(fromPrice, toPrice);
+    }
+    
+    const TRUCKS = Array.from({ length: 15 }, (_, i) => `MO${i+1}`);
+    const SURVEY_TIMES = ["9:30 صباحاً", "10:30 صباحاً", "11:30 صباحاً", "12:30 ظهراً", "1:30 ظهراً", "2:30 عصراً", "3:30 عصراً"];
+    const DELIVERY_TIMES = ["9:30 صباحاً", "10:30 صباحاً", "11:30 صباحاً", "12:30 ظهراً", "1:30 ظهراً", "2:30 عصراً", "3:30 عصراً"];
+    
+    // البيانات
+    let movingBookings = [], surveyBookings = [], deliveryBookings = [], trucksOff = [];
+    let movingCurrentDate = new Date().toISOString().slice(0,10);
+    let surveyCurrentDate = new Date().toISOString().slice(0,10);
+    let deliveryCurrentDate = new Date().toISOString().slice(0,10);
+    let currentEditId = null;
+    let movingMonth = new Date().getMonth();
+    let movingYear = new Date().getFullYear();
+    let emailList = [];
+    
+    function formatDate(dateStr) { return new Date(dateStr).toLocaleDateString('ar-KW', { weekday:'long', year:'numeric', month:'long', day:'numeric' }); }
+    
+    // إدارة الإيميلات
+    function loadEmails() {
+        const stored = localStorage.getItem("packmove_emails");
+        emailList = stored ? JSON.parse(stored) : [];
+        renderEmailList();
+    }
+    
+    function saveEmails() {
+        localStorage.setItem("packmove_emails", JSON.stringify(emailList));
+        renderEmailList();
+    }
+    
+    function renderEmailList() {
+        const container = document.getElementById("emailList");
+        if(!container) return;
+        container.innerHTML = emailList.map((email, idx) => `
+            <div class="email-tag">
+                <i class="fas fa-envelope"></i> ${email}
+                <i class="fas fa-times-circle" onclick="removeEmail(${idx})" style="cursor:pointer;"></i>
+            </div>
+        `).join('');
+        document.getElementById("emailCount").innerHTML = `📧 عدد الإيميلات المسجلة: ${emailList.length}`;
+    }
+    
+    function addEmail() {
+        const input = document.getElementById("newEmailInput");
+        const email = input.value.trim();
+        if(email && !emailList.includes(email)) {
+            emailList.push(email);
+            saveEmails();
+            input.value = "";
+        } else if(emailList.includes(email)) {
+            alert("هذا البريد مضاف بالفعل");
+        }
+    }
+    
+    function removeEmail(idx) {
+        emailList.splice(idx, 1);
+        saveEmails();
+    }
+    
+    function sendEmailToAll(action, data, type) {
+        if(emailList.length === 0) return;
+        const subject = `[باك اند موف] ${action} - ${type}`;
+        const body = `${action} في النظام\n\nالتاريخ: ${new Date().toLocaleString('ar-KW')}\n\nالبيانات:\n${JSON.stringify(data, null, 2)}\n\n--\nباك اند موف - نظام إدارة النقل\nتم الإرسال إلى ${emailList.length} موظف`;
+        const allEmails = emailList.join(';');
+        window.open(`mailto:${allEmails}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    }
+    
+    function isTruckAvailable(truck, date, timeSlot, excludeId = null) {
+        if(trucksOff.includes(truck)) return false;
+        return !movingBookings.find(b => b.truck === truck && b.date === date && b.timeSlot === timeSlot && b.id !== excludeId && (b.status === 'confirmed' || b.status === 'pending'));
+    }
+    
+    // ============= دوال النقل =============
+    function renderMovingTrucks() {
+        const grid = document.getElementById("trucksGrid");
+        if(!grid) return;
+        grid.innerHTML = "";
+        TRUCKS.forEach(truck => {
+            const isOff = trucksOff.includes(truck);
+            const morningBooked = movingBookings.some(b => b.truck === truck && b.date === movingCurrentDate && b.timeSlot === 'صباحاً' && b.status !== 'cancelled');
+            const eveningBooked = movingBookings.some(b => b.truck === truck && b.date === movingCurrentDate && b.timeSlot === 'مساءً' && b.status !== 'cancelled');
+            let statusClass = 'available';
+            let statusText = '✅ متاحة';
+            if(isOff) { statusClass = 'off'; statusText = '🔧 إجازة'; }
+            else if(morningBooked && eveningBooked) { statusClass = 'booked'; statusText = '📅 محجوزة (صباحاً + مساءً)'; }
+            else if(morningBooked) { statusClass = 'booked'; statusText = '📅 محجوزة (صباحاً)'; }
+            else if(eveningBooked) { statusClass = 'booked'; statusText = '📅 محجوزة (مساءً)'; }
+            const morningBooking = movingBookings.find(b => b.truck === truck && b.date === movingCurrentDate && b.timeSlot === 'صباحاً');
+            const eveningBooking = movingBookings.find(b => b.truck === truck && b.date === movingCurrentDate && b.timeSlot === 'مساءً');
+            const card = document.createElement("div");
+            card.className = `truck-card ${statusClass}`;
+            if(!isOff) card.onclick = () => openMovingModal(truck);
+            card.innerHTML = `<div class="truck-number">${truck}</div><div class="truck-status">${statusText}</div>
+                <div class="truck-time-info">${morningBooking ? `<div>🌅 صباحاً: ${morningBooking.clientName.substring(0,10)}</div>` : '<div>🌅 صباحاً: متاحة</div>'}
+                ${eveningBooking ? `<div>🌙 مساءً: ${eveningBooking.clientName.substring(0,10)}</div>` : '<div>🌙 مساءً: متاحة</div>'}</div>`;
+            grid.appendChild(card);
+        });
+        document.getElementById("movingSelectedDate").innerHTML = formatDate(movingCurrentDate);
+        document.getElementById("movingCurrentDate").innerHTML = `<i class="fas fa-calendar-alt"></i> ${formatDate(movingCurrentDate)}`;
+        document.getElementById("movingDatePicker").value = movingCurrentDate;
+    }
+    
+    function renderMovingCalendar() {
+        const firstDay = new Date(movingYear, movingMonth, 1);
+        const lastDay = new Date(movingYear, movingMonth + 1, 0);
+        const startDay = firstDay.getDay();
+        const daysInMonth = lastDay.getDate();
+        let calendarHTML = '<div class="calendar-grid">';
+        const weekDays = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        weekDays.forEach(day => calendarHTML += `<div style="font-weight:bold;">${day}</div>`);
+        for(let i=0; i<startDay; i++) calendarHTML += '<div></div>';
+        for(let d=1; d<=daysInMonth; d++) {
+            const dateStr = `${movingYear}-${String(movingMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const activeBookings = movingBookings.filter(b => b.date === dateStr && (b.status === 'confirmed' || b.status === 'pending'));
+            const bookedCount = activeBookings.length;
+            let cellClass = 'calendar-day available';
+            if(bookedCount >= 12) cellClass = 'calendar-day booked';
+            else if(bookedCount >= 6) cellClass = 'calendar-day partial';
+            calendarHTML += `<div class="${cellClass}" onclick="movingGoToDate('${dateStr}')">${d}<br><small>${bookedCount}/15</small></div>`;
+        }
+        calendarHTML += '</div>';
+        document.getElementById("movingCalendarGrid").innerHTML = calendarHTML;
+        document.getElementById("movingCurrentMonthYear").innerHTML = `${firstDay.toLocaleDateString('ar-KW', { month:'long' })} ${movingYear}`;
+    }
+    
+    window.movingGoToDate = (date) => { movingCurrentDate = date; renderMovingTrucks(); renderMovingTable(); renderMovingCalendar(); };
+    
+    function showMovingClientHistory(phone) {
+        const clientBookings = movingBookings.filter(b => b.phone === phone).sort((a,b)=>new Date(b.date)-new Date(a.date));
+        const clientName = clientBookings[0]?.clientName || "غير معروف";
+        document.getElementById("movingSelectedInfo").style.display = "block";
+        document.getElementById("movingSelectedInfo").innerHTML = `<i class="fas fa-user-circle"></i> <strong>${clientName}</strong> | ${phone} | إجمالي الحجوزات: ${clientBookings.length}`;
+        const tbody = document.getElementById("movingHistoryBody");
+        tbody.innerHTML = "";
+        clientBookings.forEach((b,idx) => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = idx+1;
+            row.insertCell(1).innerText = b.date;
+            row.insertCell(2).innerText = b.timeSlot;
+            row.insertCell(3).innerText = b.truck;
+            row.insertCell(4).innerText = b.fromArea;
+            row.insertCell(5).innerText = b.toArea;
+            row.insertCell(6).innerText = `${b.numDroops} درب`;
+            row.insertCell(7).innerText = `${b.pricePerDrop} د.ك`;
+            row.insertCell(8).innerText = `${b.totalPrice || 0} د.ك`;
+            row.insertCell(9).innerHTML = `<span class="status-badge status-${b.status}">${b.status==='confirmed'?'تأكيد':(b.status==='pending'?'انتظار':'كنسل')}</span>`;
+            row.insertCell(10).innerText = b.notes || "-";
+            row.insertCell(11).innerHTML = `<div class="history-note">${b.modifyHistory ? b.modifyHistory.substring(0,40) : '-'}</div>`;
+            row.insertCell(12).innerHTML = `<button onclick="editMovingBooking(${b.id})" style="background:#eab308;padding:4px 8px;">تعديل</button>`;
+        });
+        document.getElementById("movingHistorySection").style.display = "block";
+        document.getElementById("movingAllClients").style.display = "none";
+    }
+    
+    function showAllMovingClients() {
+        const clientsMap = new Map();
+        movingBookings.forEach(b => {
+            if(!clientsMap.has(b.phone)) clientsMap.set(b.phone, { name: b.clientName, phone: b.phone, bookings: [], total: 0 });
+            const client = clientsMap.get(b.phone);
+            client.bookings.push(b);
+            client.total += b.totalPrice || 0;
+        });
+        const clients = Array.from(clientsMap.values()).sort((a,b)=>b.bookings.length - a.bookings.length);
+        const tbody = document.getElementById("movingAllBody");
+        tbody.innerHTML = "";
+        clients.forEach((c,idx) => {
+            const lastBooking = c.bookings.sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = idx+1;
+            row.insertCell(1).innerText = c.name;
+            row.insertCell(2).innerText = c.phone;
+            row.insertCell(3).innerText = c.bookings.length;
+            row.insertCell(4).innerText = lastBooking?.date || "-";
+            row.insertCell(5).innerText = `${c.total} د.ك`;
+            row.insertCell(6).innerHTML = `<button onclick="showMovingClientHistory('${c.phone}')" style="background:#0a1a2f;padding:4px 8px;">عرض</button>`;
+        });
+        document.getElementById("movingHistorySection").style.display = "none";
+        document.getElementById("movingAllClients").style.display = "block";
+    }
+    
+    function openMovingModal(truck, existingBooking=null) {
+        currentEditId = existingBooking?.id || null;
+        document.getElementById("modalTitle").innerHTML = existingBooking ? `✏️ تعديل حجز ${truck}` : `➕ حجز جديد - ${truck}`;
+        if(existingBooking) {
+            document.getElementById("modalClientName").value = existingBooking.clientName;
+            document.getElementById("modalClientPhone").value = existingBooking.phone;
+            document.getElementById("modalFromArea").value = existingBooking.fromArea;
+            document.getElementById("modalToArea").value = existingBooking.toArea;
+            document.getElementById("modalMoveDate").value = existingBooking.date;
+            document.getElementById("modalTimeSlot").value = existingBooking.timeSlot;
+            document.getElementById("modalNumDroops").value = existingBooking.numDroops;
+            document.getElementById("modalStatus").value = existingBooking.status;
+            document.getElementById("modalNotes").value = existingBooking.notes || "";
+        } else {
+            document.getElementById("modalClientName").value = "";
+            document.getElementById("modalClientPhone").value = "";
+            document.getElementById("modalFromArea").value = "";
+            document.getElementById("modalToArea").value = "";
+            document.getElementById("modalMoveDate").value = movingCurrentDate;
+            document.getElementById("modalTimeSlot").value = "صباحاً";
+            document.getElementById("modalNumDroops").value = "1";
+            document.getElementById("modalStatus").value = "pending";
+            document.getElementById("modalNotes").value = "";
+        }
+        const select = document.getElementById("modalTruck");
+        select.innerHTML = TRUCKS.map(t => `<option value="${t}" ${t===truck ? 'selected' : ''}>${t}</option>`).join('');
+        updatePrice();
+        document.getElementById("bookingModal").style.display = "flex";
+    }
+    
+    function updatePrice() {
+        const fromArea = document.getElementById("modalFromArea").value;
+        const toArea = document.getElementById("modalToArea").value;
+        const droops = parseInt(document.getElementById("modalNumDroops").value) || 1;
+        if(fromArea && toArea && ALL_AREAS.includes(fromArea) && ALL_AREAS.includes(toArea)) {
+            const price = calculateTripPrice(fromArea, toArea);
+            const total = price * droops;
+            document.getElementById("modalPriceDisplay").innerHTML = `💰 السعر: ${price} د.ك للدرب | الإجمالي: ${total} د.ك`;
+        } else {
+            document.getElementById("modalPriceDisplay").innerHTML = `💰 اختر المنطقتين أولاً`;
+        }
+    }
+    
+    function saveMovingBooking() {
+        const clientName = document.getElementById("modalClientName").value.trim();
+        const phone = document.getElementById("modalClientPhone").value.trim();
+        const fromArea = document.getElementById("modalFromArea").value;
+        const toArea = document.getElementById("modalToArea").value;
+        const date = document.getElementById("modalMoveDate").value;
+        const timeSlot = document.getElementById("modalTimeSlot").value;
+        const numDroops = document.getElementById("modalNumDroops").value;
+        const truck = document.getElementById("modalTruck").value;
+        const status = document.getElementById("modalStatus").value;
+        const notes = document.getElementById("modalNotes").value;
+        if(!clientName || !phone || !fromArea || !toArea || !date || !truck) { alert("املأ جميع الحقول الأساسية"); return; }
+        const price = calculateTripPrice(fromArea, toArea);
+        const totalPrice = price * parseInt(numDroops);
+        if(status !== 'cancelled' && !isTruckAvailable(truck, date, timeSlot, currentEditId)) {
+            alert(`السيارة ${truck} غير متاحة في هذا اليوم والموعد`);
+            return;
+        }
+        const now = new Date().toLocaleString('ar-KW');
+        let action = "";
+        if(currentEditId) {
+            const index = movingBookings.findIndex(b => b.id === currentEditId);
+            if(index !== -1) {
+                const old = movingBookings[index];
+                movingBookings[index] = { ...old, clientName, phone, fromArea, toArea, date, timeSlot, numDroops, truck, status, notes, pricePerDrop: price, totalPrice, modifyHistory: `${old.modifyHistory || ''}\n✏️ تعديل - ${now}` };
+                action = "تعديل حجز نقل";
+            }
+        } else {
+            movingBookings.push({ id: Date.now(), clientName, phone, fromArea, toArea, date, timeSlot, numDroops, truck, status, notes, pricePerDrop: price, totalPrice, modifyHistory: `✅ إنشاء - ${now}` });
+            action = "تسجيل حجز نقل جديد";
+        }
+        persistData();
+        renderMovingOnly();
+        closeModal();
+        sendEmailToAll(action, { clientName, phone, fromArea, toArea, date, timeSlot, numDroops, truck, status, totalPrice }, "Moving");
+        alert("✅ تم حفظ الحجز");
+    }
+    
+    window.deleteMoving = (id) => {
+        if(confirm("حذف الحجز؟")) { 
+            movingBookings = movingBookings.filter(b => b.id !== id); 
+            persistData(); 
+            renderMovingOnly(); 
+            sendEmailToAll("حذف حجز نقل", { id }, "Moving");
+        }
+    };
+    
+    function renderMovingTable() {
+        document.getElementById("movingStats").innerHTML = `<div class="stat-card"><i class="fas fa-truck"></i><h3>${movingBookings.filter(b=>b.date===movingCurrentDate && b.status!=='cancelled').length}</h3><p>نقل اليوم</p></div>
+        <div class="stat-card"><i class="fas fa-users"></i><h3>${movingBookings.length}</h3><p>إجمالي النقل</p></div>`;
+        showAllMovingClients();
+    }
+    
+    function renderMovingOnly() { renderMovingTrucks(); renderMovingTable(); renderMovingCalendar(); }
+    
+    // ============= دوال المعاينة =============
+    function renderSurveyTimeSlots() {
+        const container = document.getElementById("surveyTimeSlots");
+        if(!container) return;
+        container.innerHTML = "";
+        const dayBookings = surveyBookings.filter(b => b.date === surveyCurrentDate);
+        SURVEY_TIMES.forEach(time => {
+            const isBooked = dayBookings.some(b => b.timeSlot === time);
+            const slot = document.createElement("div");
+            slot.className = `time-slot ${isBooked ? 'booked' : 'available'}`;
+            slot.innerHTML = `<i class="fas fa-clock"></i> ${time}`;
+            if(!isBooked) slot.onclick = () => openSurveyModal(time);
+            container.appendChild(slot);
+        });
+        document.getElementById("surveySelectedDate").innerHTML = formatDate(surveyCurrentDate);
+        document.getElementById("surveyCurrentDate").innerHTML = formatDate(surveyCurrentDate);
+        document.getElementById("surveyDatePicker").value = surveyCurrentDate;
+    }
+    
+    function renderSurveyTable() {
+        const tbody = document.getElementById("surveyTbody");
+        if(!tbody) return;
+        tbody.innerHTML = "";
+        surveyBookings.filter(b => b.date === surveyCurrentDate).forEach((b,idx) => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = idx+1;
+            row.insertCell(1).innerText = b.clientName;
+            row.insertCell(2).innerText = b.phone;
+            row.insertCell(3).innerText = b.address;
+            row.insertCell(4).innerText = b.timeSlot;
+            row.insertCell(5).innerText = b.notes || "-";
+            row.insertCell(6).innerHTML = `<button onclick="deleteSurvey(${b.id})" style="background:#dc2626;padding:4px 8px;">حذف</button>`;
+        });
+        document.getElementById("surveyStats").innerHTML = `<div class="stat-card"><i class="fas fa-clipboard-list"></i><h3>${surveyBookings.filter(b=>b.date===surveyCurrentDate).length}</h3><p>معاينات اليوم</p></div>
+        <div class="stat-card"><i class="fas fa-calendar-alt"></i><h3>${surveyBookings.length}</h3><p>إجمالي المعاينات</p></div>`;
+    }
+    
+    function openSurveyModal(time) {
+        const clientName = prompt("اسم العميل:");
+        if(!clientName) return;
+        const phone = prompt("رقم الجوال:");
+        if(!phone) return;
+        const address = prompt("العنوان:");
+        if(!address) return;
+        const notes = prompt("ملاحظات إضافية:");
+        const newSurvey = { id: Date.now(), clientName, phone, address, date: surveyCurrentDate, timeSlot: time, notes };
+        surveyBookings.push(newSurvey);
+        persistData();
+        renderSurveyTimeSlots();
+        renderSurveyTable();
+        sendEmailToAll("تسجيل معاينة جديدة", newSurvey, "Survey");
+        alert("✅ تم تسجيل المعاينة");
+    }
+    
+    window.deleteSurvey = (id) => {
+        if(confirm("حذف المعاينة؟")) { surveyBookings = surveyBookings.filter(b => b.id !== id); persistData(); renderSurveyTimeSlots(); renderSurveyTable(); sendEmailToAll("حذف معاينة", {id}, "Survey"); }
+    };
+    
+    // ============= دوال التوصيل =============
+    function renderDeliveryTimeSlots() {
+        const container = document.getElementById("deliveryTimeSlots");
+        if(!container) return;
+        container.innerHTML = "";
+        const dayBookings = deliveryBookings.filter(b => b.date === deliveryCurrentDate);
+        DELIVERY_TIMES.forEach(time => {
+            const isBooked = dayBookings.some(b => b.timeSlot === time);
+            const slot = document.createElement("div");
+            slot.className = `time-slot ${isBooked ? 'booked' : 'available'}`;
+            slot.innerHTML = `<i class="fas fa-clock"></i> ${time}`;
+            if(!isBooked) slot.onclick = () => openDeliveryModal(time);
+            container.appendChild(slot);
+        });
+        document.getElementById("deliverySelectedDate").innerHTML = formatDate(deliveryCurrentDate);
+        document.getElementById("deliveryCurrentDate").innerHTML = formatDate(deliveryCurrentDate);
+        document.getElementById("deliveryDatePicker").value = deliveryCurrentDate;
+    }
+    
+    function renderDeliveryTable() {
+        const tbody = document.getElementById("deliveryTbody");
+        if(!tbody) return;
+        tbody.innerHTML = "";
+        deliveryBookings.filter(b => b.date === deliveryCurrentDate).forEach((b,idx) => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = idx+1;
+            row.insertCell(1).innerText = b.clientName;
+            row.insertCell(2).innerText = b.phone;
+            row.insertCell(3).innerText = b.address;
+            row.insertCell(4).innerText = b.timeSlot;
+            row.insertCell(5).innerText = b.notes || "-";
+            row.insertCell(6).innerHTML = `<button onclick="deleteDelivery(${b.id})" style="background:#dc2626;padding:4px 8px;">حذف</button>`;
+        });
+        document.getElementById("deliveryStats").innerHTML = `<div class="stat-card"><i class="fas fa-box"></i><h3>${deliveryBookings.filter(b=>b.date===deliveryCurrentDate).length}</h3><p>توصيل اليوم</p></div>
+        <div class="stat-card"><i class="fas fa-calendar-alt"></i><h3>${deliveryBookings.length}</h3><p>إجمالي الطلبات</p></div>`;
+    }
+    
+    function openDeliveryModal(time) {
+        const clientName = prompt("اسم العميل:");
+        if(!clientName) return;
+        const phone = prompt("رقم الجوال:");
+        if(!phone) return;
+        const address = prompt("عنوان التوصيل:");
+        if(!address) return;
+        const notes = prompt("تفاصيل الطلب:");
+        if(!notes) return;
+        const newDelivery = { id: Date.now(), clientName, phone, address, date: deliveryCurrentDate, timeSlot: time, notes };
+        deliveryBookings.push(newDelivery);
+        persistData();
+        renderDeliveryTimeSlots();
+        renderDeliveryTable();
+        sendEmailToAll("تسجيل طلب توصيل جديد", newDelivery, "Delivery");
+        alert("✅ تم تسجيل طلب التوصيل");
+    }
+    
+    window.deleteDelivery = (id) => {
+        if(confirm("حذف الطلب؟")) { deliveryBookings = deliveryBookings.filter(b => b.id !== id); persistData(); renderDeliveryTimeSlots(); renderDeliveryTable(); sendEmailToAll("حذف طلب توصيل", {id}, "Delivery"); }
+    };
+    
+    // ============= التقارير المنفصلة =============
+    function exportMovingReport() {
+        const date = document.getElementById("reportDate").value;
+        const moving = movingBookings.filter(b => b.date === date && b.status !== 'cancelled');
+        const exportData = moving.map((b, idx) => ({
+            "م": idx+1, "اسم العميل": b.clientName, "رقم الجوال": b.phone,
+            "من": b.fromArea, "إلى": b.toArea, "التاريخ": b.date, "الموعد": b.timeSlot,
+            "السيارة": b.truck, "عدد الدروب": b.numDroops, "سعر الدرب": `${b.pricePerDrop} د.ك`,
+            "الإجمالي": `${b.totalPrice} د.ك`, "الحالة": b.status === 'confirmed' ? 'تأكيد' : (b.status === 'pending' ? 'انتظار' : 'كنسل'),
+            "الملاحظات": b.notes || "", "سجل التعديلات": b.modifyHistory || ""
+        }));
+        if(exportData.length === 0) { alert(`لا توجد حجوزات نقل في تاريخ ${date}`); return; }
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "MovingReport");
+        XLSX.writeFile(wb, `Moving_Report_${date}.xlsx`);
+        alert(`✅ تم تصدير ${exportData.length} حجز نقل`);
+    }
+    
+    function exportSurveyReport() {
+        const date = document.getElementById("reportDate").value;
+        const survey = surveyBookings.filter(b => b.date === date);
+        const exportData = survey.map((b, idx) => ({
+            "م": idx+1, "اسم العميل": b.clientName, "رقم الجوال": b.phone,
+            "العنوان": b.address, "التاريخ": b.date, "الموعد": b.timeSlot, "الملاحظات": b.notes || ""
+        }));
+        if(exportData.length === 0) { alert(`لا توجد معاينات في تاريخ ${date}`); return; }
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "SurveyReport");
+        XLSX.writeFile(wb, `Survey_Report_${date}.xlsx`);
+        alert(`✅ تم تصدير ${exportData.length} معاينة`);
+    }
+    
+    function exportDeliveryReport() {
+        const date = document.getElementById("reportDate").value;
+        const delivery = deliveryBookings.filter(b => b.date === date);
+        const exportData = delivery.map((b, idx) => ({
+            "م": idx+1, "اسم العميل": b.clientName, "رقم الجوال": b.phone,
+            "عنوان التوصيل": b.address, "التاريخ": b.date, "الموعد": b.timeSlot, "تفاصيل الطلب": b.notes || ""
+        }));
+        if(exportData.length === 0) { alert(`لا توجد طلبات توصيل في تاريخ ${date}`); return; }
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "DeliveryReport");
+        XLSX.writeFile(wb, `Delivery_Report_${date}.xlsx`);
+        alert(`✅ تم تصدير ${exportData.length} طلب توصيل`);
+    }
+    
+    function exportTeamsReport() {
+        const date = document.getElementById("reportDate").value;
+        const moving = movingBookings.filter(b => b.date === date && b.status !== 'cancelled');
+        const teamsMap = new Map();
+        moving.forEach(b => { if(!teamsMap.has(b.truck)) teamsMap.set(b.truck, []); teamsMap.get(b.truck).push(b); });
+        const exportData = [];
+        let idx = 1;
+        for(const [team, bookings] of teamsMap) {
+            bookings.forEach(b => { exportData.push({ "م": idx++, "الفريق": team, "العميل": b.clientName, "من": b.fromArea, "إلى": b.toArea, "عدد الدروب": b.numDroops, "الموعد": b.timeSlot, "السعر الإجمالي": `${b.totalPrice} د.ك` }); });
+        }
+        if(exportData.length === 0) { alert(`لا توجد حجوزات نقل في تاريخ ${date}`); return; }
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "TeamsReport");
+        XLSX.writeFile(wb, `Teams_Report_${date}.xlsx`);
+        alert(`✅ تم تصدير تقرير الفرق - ${exportData.length} مهمة`);
+    }
+    
+    function updateTeamsReport(date) {
+        const moving = movingBookings.filter(b => b.date === date && b.status !== 'cancelled');
+        const teamsBody = document.getElementById("teamsReportBody");
+        teamsBody.innerHTML = "";
+        moving.forEach(b => { const row = teamsBody.insertRow(); row.insertCell(0).innerText = b.truck; row.insertCell(1).innerText = b.numDroops || 1; row.insertCell(2).innerText = b.clientName; row.insertCell(3).innerText = b.fromArea; row.insertCell(4).innerText = b.toArea; row.insertCell(5).innerText = b.timeSlot; });
+        const survey = surveyBookings.filter(b => b.date === date);
+        const delivery = deliveryBookings.filter(b => b.date === date);
+        document.getElementById("dailySummary").innerHTML = `<strong>📊 ملخص اليوم ${date}</strong><br>🚛 النقل: ${moving.length} حجز<br>📋 المعاينة: ${survey.length} حجز<br>📦 التوصيل: ${delivery.length} طلب<br>💰 إجمالي الإيرادات: ${moving.reduce((s,b)=>s+(b.totalPrice||0),0)} د.ك`;
+    }
+    
+    // ============= عام =============
+    function persistData() {
+        localStorage.setItem("packmove_moving_final", JSON.stringify(movingBookings));
+        localStorage.setItem("packmove_survey_final", JSON.stringify(surveyBookings));
+        localStorage.setItem("packmove_delivery_final", JSON.stringify(deliveryBookings));
+        localStorage.setItem("packmove_trucks_off_final", JSON.stringify(trucksOff));
+    }
+    
+    function loadData() {
+        movingBookings = JSON.parse(localStorage.getItem("packmove_moving_final") || "[]");
+        surveyBookings = JSON.parse(localStorage.getItem("packmove_survey_final") || "[]");
+        deliveryBookings = JSON.parse(localStorage.getItem("packmove_delivery_final") || "[]");
+        trucksOff = JSON.parse(localStorage.getItem("packmove_trucks_off_final") || "[]");
+        renderAll();
+    }
+    
+    function renderAll() {
+        renderMovingOnly();
+        renderSurveyTimeSlots();
+        renderSurveyTable();
+        renderDeliveryTimeSlots();
+        renderDeliveryTable();
+        const today = new Date().toISOString().slice(0,10);
+        updateTeamsReport(today);
+    }
+    
+    function closeModal() { document.getElementById("bookingModal").style.display = "none"; currentEditId = null; }
+    
+    function populateAreas() {
+        const fromSelect = document.getElementById("modalFromArea");
+        const toSelect = document.getElementById("modalToArea");
+        const areaOptions = '<option value="">-- اختر المنطقة --</option>' + [...AREAS_PRICE_B, ...AREAS_PRICE_C, ...AREAS_PRICE_D].map(a => `<option value="${a}">${a}</option>`).join('');
+        fromSelect.innerHTML = areaOptions;
+        toSelect.innerHTML = areaOptions;
+        fromSelect.onchange = updatePrice;
+        toSelect.onchange = updatePrice;
+        document.getElementById("modalNumDroops").onchange = updatePrice;
+    }
+    
+    // الأحداث
+    document.getElementById("movingPrevDay").onclick = () => { movingCurrentDate = new Date(new Date(movingCurrentDate).setDate(new Date(movingCurrentDate).getDate()-1)).toISOString().slice(0,10); renderMovingOnly(); };
+    document.getElementById("movingNextDay").onclick = () => { movingCurrentDate = new Date(new Date(movingCurrentDate).setDate(new Date(movingCurrentDate).getDate()+1)).toISOString().slice(0,10); renderMovingOnly(); };
+    document.getElementById("movingToday").onclick = () => { movingCurrentDate = new Date().toISOString().slice(0,10); renderMovingOnly(); };
+    document.getElementById("movingGoToDate").onclick = () => { const v = document.getElementById("movingDatePicker").value; if(v){ movingCurrentDate=v; renderMovingOnly(); } };
+    document.getElementById("searchMovingBtn").onclick = () => { const term = document.getElementById("searchMoving").value; if(term){ const matched = movingBookings.find(b=>b.clientName.includes(term)||b.phone.includes(term)); if(matched) showMovingClientHistory(matched.phone); else alert("لا يوجد عميل"); } else showAllMovingClients(); };
+    document.getElementById("showAllMovingBtn").onclick = () => showAllMovingClients();
+    document.getElementById("newMovingBtn").onclick = () => openMovingModal("MO1");
+    document.getElementById("confirmBookingBtn").onclick = saveMovingBooking;
+    document.getElementById("movingPrevMonth").onclick = () => { movingMonth--; if(movingMonth<0){movingMonth=11;movingYear--;} renderMovingCalendar(); };
+    document.getElementById("movingNextMonth").onclick = () => { movingMonth++; if(movingMonth>11){movingMonth=0;movingYear++;} renderMovingCalendar(); };
+    
+    document.getElementById("surveyPrevDay").onclick = () => { surveyCurrentDate = new Date(new Date(surveyCurrentDate).setDate(new Date(surveyCurrentDate).getDate()-1)).toISOString().slice(0,10); renderSurveyTimeSlots(); renderSurveyTable(); };
+    document.getElementById("surveyNextDay").onclick = () => { surveyCurrentDate = new Date(new Date(surveyCurrentDate).setDate(new Date(surveyCurrentDate).getDate()+1)).toISOString().slice(0,10); renderSurveyTimeSlots(); renderSurveyTable(); };
+    document.getElementById("surveyToday").onclick = () => { surveyCurrentDate = new Date().toISOString().slice(0,10); renderSurveyTimeSlots(); renderSurveyTable(); };
+    document.getElementById("surveyGoToDate").onclick = () => { const v = document.getElementById("surveyDatePicker").value; if(v){ surveyCurrentDate=v; renderSurveyTimeSlots(); renderSurveyTable(); } };
+    document.getElementById("searchSurveyBtn").onclick = () => renderSurveyTable();
+    document.getElementById("showAllSurveyBtn").onclick = () => renderSurveyTable();
+    document.getElementById("newSurveyBtn").onclick = () => openSurveyModal(SURVEY_TIMES[0]);
+    
+    document.getElementById("deliveryPrevDay").onclick = () => { deliveryCurrentDate = new Date(new Date(deliveryCurrentDate).setDate(new Date(deliveryCurrentDate).getDate()-1)).toISOString().slice(0,10); renderDeliveryTimeSlots(); renderDeliveryTable(); };
+    document.getElementById("deliveryNextDay").onclick = () => { deliveryCurrentDate = new Date(new Date(deliveryCurrentDate).setDate(new Date(deliveryCurrentDate).getDate()+1)).toISOString().slice(0,10); renderDeliveryTimeSlots(); renderDeliveryTable(); };
+    document.getElementById("deliveryToday").onclick = () => { deliveryCurrentDate = new Date().toISOString().slice(0,10); renderDeliveryTimeSlots(); renderDeliveryTable(); };
+    document.getElementById("deliveryGoToDate").onclick = () => { const v = document.getElementById("deliveryDatePicker").value; if(v){ deliveryCurrentDate=v; renderDeliveryTimeSlots(); renderDeliveryTable(); } };
+    document.getElementById("searchDeliveryBtn").onclick = () => renderDeliveryTable();
+    document.getElementById("showAllDeliveryBtn").onclick = () => renderDeliveryTable();
+    document.getElementById("newDeliveryBtn").onclick = () => openDeliveryModal(DELIVERY_TIMES[0]);
+    
+    document.getElementById("exportMovingReport").onclick = () => { const date = document.getElementById("reportDate").value; updateTeamsReport(date); exportMovingReport(); };
+    document.getElementById("exportSurveyReport").onclick = exportSurveyReport;
+    document.getElementById("exportDeliveryReport").onclick = exportDeliveryReport;
+    document.getElementById("exportTeamsReport").onclick = () => { const date = document.getElementById("reportDate").value; updateTeamsReport(date); exportTeamsReport(); };
+    
+    document.getElementById("addEmailBtn").onclick = addEmail;
+    
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById("movingTab").style.display = "none";
+            document.getElementById("surveyTab").style.display = "none";
+            document.getElementById("deliveryTab").style.display = "none";
+            document.getElementById("reportTab").style.display = "none";
+            if(btn.dataset.tab === "moving") document.getElementById("movingTab").style.display = "block";
+            else if(btn.dataset.tab === "survey") document.getElementById("surveyTab").style.display = "block";
+            else if(btn.dataset.tab === "delivery") document.getElementById("deliveryTab").style.display = "block";
+            else if(btn.dataset.tab === "report") document.getElementById("reportTab").style.display = "block";
+        };
+    });
+    
+    window.removeEmail = removeEmail;
+    window.editMovingBooking = (id) => { const booking = movingBookings.find(b=>b.id===id); if(booking) openMovingModal(booking.truck, booking); };
+    window.showMovingClientHistory = showMovingClientHistory;
+    
+    populateAreas();
+    loadEmails();
+    loadData();
+    window.closeModal = closeModal;
+</script>
+</body>
+</html>
